@@ -157,7 +157,8 @@ Page({
           url: 'https://litin.gmiot.net/1/auth/access_token',
           data: {
             method: 'loginByWechat',
-            wxcode: res.code
+            wxcode: res.code,
+            source: '' // 使用开源代码的用户，需要向谷米提供小程序appid申请对应source字符串验证
           },
           success: function (res) {
             app.globalData.account = res.data.data.account

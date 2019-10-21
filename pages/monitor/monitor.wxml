@@ -11,8 +11,8 @@
     </cover-view>
 </cover-view>
 
-<cover-view class="btnContainerRight">
-    <cover-view class="bindDevice" bindtap="bindDevice" hover-class="clicked" wx:if="{{!noDevice}}" style="background-color:#fff">
+<cover-view class="btnContainerRight" wx:if="{{!noDevice}}">
+    <cover-view class="bindDevice" bindtap="bindDevice" hover-class="clicked" style="background-color:#fff">
         <cover-image src="./../images/plus.png" class="bindImage"></cover-image>
         <cover-view class="bindText">绑定设备</cover-view>
     </cover-view>

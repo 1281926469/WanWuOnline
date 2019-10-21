@@ -86,11 +86,12 @@ Page({
   },
   getWxOpenid (login, cb) {
     wx.request({
-      url: 'https://litin.gpsoo.net/1/auth/access_token',
+      url: 'https://litin.gmiot.net/1/auth/access_token',
       data: {
         method: 'getWxOpenid',
         wxcode: login.code,
-        access_token: app.globalData.accessToken
+        access_token: app.globalData.accessToken,
+        source: ""  // 使用开源代码的用户，需要向谷米提供小程序appid申请对应source字符串验证
       },
       success: function (res) {
         if (res.data.errcode == 0) {

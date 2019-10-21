@@ -13,7 +13,7 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.2.0",
 	"appid": "wxdcc84289041d647b",
-	"projectname": "%E4%B8%87%E7%89%A9%E5%9C%A8%E7%BA%BF",
+	"projectname": "%E4%B8%87%E7%89%A9%E5%9C%A8%E7%BA%BF-xak",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
 	"condition": {
@@ -39,7 +39,7 @@
 				{
 					"id": -1,
 					"name": "万物在线",
-					"pathName": "pages/monitor/monitor",
+					"pathName": "pages/authorize/authorize",
 					"query": "",
 					"scene": "1001"
 				},

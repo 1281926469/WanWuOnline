@@ -1,9 +1,9 @@
 {
   "pages": [
     "pages/authorize/authorize",
-    "pages/bms/bms",
     "pages/monitor/monitor",
     "pages/deviceList/deviceList",
+    "pages/bms/bms",
     "pages/calendar/calendar",
     "pages/detail/editName/editName",
     "pages/detail/editCard/editCard",
