@@ -75,7 +75,7 @@ Page({
   getDeviceList: function () {
     const that = this;
     wx.request({
-      url: 'https://litin.gpsoo.net/1/account/monitor',
+      url: 'https://litin.gmiot.net/1/account/monitor',
       data: {
         access_type: 'inner',
         map_type: 'AMAP',
@@ -102,7 +102,6 @@ Page({
   },
   chooseDevice (e) {
     var imei = e.target.dataset.imei;
-    console.log(imei);
     app.globalData.imei = imei
     wx.reLaunch({
       url: './../monitor/monitor'

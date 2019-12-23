@@ -166,8 +166,7 @@ Page({
       success: function (res) {
         if(res.data.errcode ===0) {
           
-        } else {
-          
+        } else {          
           wx.showToast({
             title: '获取微信昵称失败'
           })

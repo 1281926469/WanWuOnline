@@ -62,9 +62,7 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-    // wx.redirectTo({
-    //   url: './../monitor/monitor'
-    // })
+    
   },
 
   /**
@@ -188,7 +186,7 @@ Page({
   },
   platformCharge() {
       const that = this
-      const url = 'https://litin.gpsoo.net/1/carol-pay'
+      const url = 'https://litin.gmiot.net/1/carol-pay'
       let params = {
         method: 'renewDevList',
         beginpos: this.data.beginpos,
@@ -217,7 +215,7 @@ Page({
               return
             }
             that.setData({
-              beginpos : 0
+              beginpos: 0
             })
             var expire = '';
             var confirmText = '确定';
@@ -293,7 +291,7 @@ Page({
   },
   initPayment(obj) {
     const that = this
-    const url = 'https://litin.gpsoo.net/1/carol-pay'
+    const url = 'https://litin.gmiot.net/1/carol-pay'
     let data = {
       method: 'renewOrder',
       imei: obj.imei,

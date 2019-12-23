@@ -1,0 +1,4 @@
+<view class="selection">
+    <button bindtap="wlCharge">物联卡充值</button>
+    <button bindtap="platCharge">平台续费</button>
+</view>

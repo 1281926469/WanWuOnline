@@ -1,0 +1,18 @@
+<view class="list">
+    <view wx:for="{{deviceList}}" hover-class="click" wx:key="*this" class="device">
+        <view class="userName"><text >{{"名称：" + item.userName}}</text></view>
+        <view  class="imei"><text>{{"卡号：" + item.msisdn}}</text></view>
+        <view class="expireTime"><text>{{m1.cutExpireTime(item.platform_out_time) + " 到期"}}</text></view>
+        <view class="price"><text >{{item.price / 1000+ " 元/年"}}</text></view>
+        <view class="charge" data-msisdn="{{item.msisdn}}" bindtap="initWlcardPayment" wx:if="{{item.card_status > 2}}"><text>续费</text></view>
+    </view>  
+</view>
+<wxs module="m1">
+    function cutExpireTime (time) {
+            return time.split(" ")[0];
+        }
+
+    module.exports = {
+        cutExpireTime: cutExpireTime
+    }
+</wxs>

@@ -14,6 +14,7 @@ App({
     accessToken: '',
     imei: '',
     openId: '',
-    appTheme: {}
+    appTheme: {},
+    showChargeReminder: true
   }
 })

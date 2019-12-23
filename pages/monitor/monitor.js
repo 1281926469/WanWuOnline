@@ -27,9 +27,21 @@ Page({
         text: 'Hello&nbsp;World!'
       }]
     }],
+    chargeNeeded: false,
+    chargeTxt: '',
+    chargeType: '',
+    animation: '',
+    showVoltage: false,
+    voltage: '',
+    showNav: false,
+    cmdUrl: ""
   },
   
   onLoad(option) {
+    if (app.globalData.showChargeReminder) {
+      this.getNotice();
+      app.globalData.showChargeReminder = false;
+    }
     const that = this;
     that.setData({
       bgcSet: 'background-color:' + app.globalData.appTheme.theme_color.color_whole
@@ -102,11 +114,40 @@ Page({
      }
    }
  },
- batteryManage () {
-  wx.navigateTo({
-    url: './../bms/bms?imei=' + this.data.currentDevice.imei
+ getBatteryStatus () {
+  const that = this;
+  const url = "https://litin.gmiot.net/1/devices/search"
+  wx.request({
+    url: url,
+    data: {
+      method: "dev_pass_info",
+      imei: that.data.currentDevice.imei,
+      access_token: app.globalData.accessToken,
+      access_type: "inner"
+    },
+    success: (res) => {
+      if (res.data.errcode ==0) {
+        if (!res.data.data.info) {
+          wx.showToast({
+            title: '无电池信息',
+            icon: 'none',
+            duration: 1000
+          })
+          return
+        }
+        wx.navigateTo({
+          url: './../bms/bms?imei=' + that.data.currentDevice.imei
+        })
+
+      } else {
+        wx.showToast({
+          title: "获取电池信息失败，请稍后重试",
+          icon: 'none'
+        })
+      }
+    }
   })
- },
+},
   markertap(e) {
     console.log(e.markerId)
   },
@@ -193,6 +234,7 @@ Page({
   },
   updateCurrentDevice (index) {
     const that = this;
+
     wx.request({
       url: 'https://litin.gmiot.net/1/account/monitor',
       data: {
@@ -276,24 +318,46 @@ Page({
               }
             }
             that.data.markers.push(obj)
-          }
+          };
           that.setData({
             markers: that.data.markers
-          })
+          });
           that.getAddress({
             latitude: that.data.currentDevice.lat,
             longitude: that.data.currentDevice.lng
           }, function (e) {
             that.data.currentDevice.address = e
             that.setData({
-              currentDevice: that.data.currentDevice
-            })
+              currentDevice: that.data.currentDevice,
+            });
+            if (e) {
+              that.setData({
+                showNav: true
+              })
+            } else {
+              that.setData({
+                showNav: false
+              })
+            }
           })
-          that.getFenceStatus(that.data.currentDevice.imei)
+          that.getFenceStatus(that.data.currentDevice.imei);
+          if (that.data.currentDevice.status) {
+            let str1 = that.data.currentDevice.status.substr(12,2);
+            let str2 = that.data.currentDevice.status.substr(14,2);           
+            var voltage = parseInt(str1, 16) + "." + parseInt(str2, 16);
+            that.setData({
+              showVoltage: true,
+              voltage: voltage
+            })
+          }
         }
       },
       fail: function (err) {
-        console.log(err)
+        wx.showToast({
+          title: '请重新登陆',
+          icon: 'none',
+          duration: 1500
+        })
       }
     })
   },
@@ -419,11 +483,11 @@ Page({
     })
   },
   switchFence() {
-    if (!this.data.fence) {
-      this.setFence(this.data.currentDevice)
-    } else {
-      this.removeFence(this.data.currentDevice.imei)
-    }
+      if (!this.data.fence) {
+        this.setFence(this.data.currentDevice)
+      } else {
+        this.removeFence(this.data.currentDevice.imei)
+      }
   },
   removeFence(imei) {
     const that = this
@@ -477,6 +541,52 @@ Page({
         cb(err)       
       }
     })
+  },
+  getNotice () {    
+    this.animation = wx.createAnimation({duration:3000,delay:500});
+    const that = this;
+    const url = "https://litin.gmiot.net/GetDataService?method=getAppNotice&access_type=inner&access_token=" + app.globalData.accessToken
+    wx.request({
+      url,
+      success: res => {
+        if (res.data.errcode ===0 && JSON.stringify(res.data.data) != "{}") {
+            that.setData({
+              chargeTxt: res.data.data.content,
+              chargeType: res.data.data.id,
+              chargeNeeded: true
+            })
+            that.animation.translateX(-140).step()
+            that.setData({animation: that.animation.export()})
+            setTimeout(function () {
+              that.setData({
+                chargeNeeded: false
+              })
+            }, 10000)       
+        }
+      }
+    })
+  },
+  toChargeList () {
+    var type = this.data.chargeType;
+    if (type == 0) {
+      wx.navigateTo({
+        url: "./../charge/platform/platform"
+      })
+    } else if (type == 1) {
+      wx.navigateTo({
+        url: "./../charge/wlcard/wlcard"
+      })
+    } else {
+      wx.navigateTo({
+        url: "./../charge/selection/selection"
+      })
+    }
+  },
+  toCommand () {
+    let params = "account="+app.globalData.account+"&time="+ String(new Date().getTime()).substr(0, 10) +"&imei="+this.data.currentDevice.imei+"&name="+this.data.currentDevice.name+"&devtype="+this.data.currentDevice.dev_type+"&access_token="+app.globalData.accessToken+"&offline=" + String(this.data.currentDevice.device_info_new == 3);
+    console.log(params);
+    wx.navigateTo({
+      url: "./../cmd/cmd?" + params
+    })
   }
-  
 })

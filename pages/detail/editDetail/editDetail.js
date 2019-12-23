@@ -104,7 +104,7 @@ Page({
       })
       return
     } else {
-      const url = 'https://litin.gpsoo.net/1/account/devinfo'
+      const url = 'https://litin.gmiot.net/1/account/devinfo'
       let data = {
         method: 'modifyUser',
         access_token: app.globalData.accessToken,

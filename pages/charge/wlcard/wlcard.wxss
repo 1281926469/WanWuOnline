@@ -1,0 +1,41 @@
+page {
+  background-color: #EFEFEF;
+  height: 100%;
+  padding-top: 16px;
+}
+.list {
+  font-size: 16px;
+  color: #030303;
+  border-top: 1px solid #ccc;
+}
+.list view.device {
+  padding: 20rpx 30rpx;
+  border-bottom: 1px solid #ccc;
+  height: 80px;
+  box-sizing: border-box;
+  position: relative;
+  background-color: #fff;
+}
+.list view.device view {
+  line-height: 20px;
+}
+.list view.device view.userName,
+.list view.device view.price,
+.list view.device view.expireTime {
+  display: inline-block;
+}
+.list view.device view.price {
+  margin-left: 10rpx;
+  color: #ccc;
+}
+.list view.device view.expireTime {
+  color: #ccc;
+}
+.list view.device view.charge {
+  height: 80px;
+  line-height: 80px;
+  position: absolute;
+  right: 20rpx;
+  top: 0;
+  color: #0097ff;
+}

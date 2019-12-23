@@ -1,0 +1,42 @@
+page {
+    background-color: #EFEFEF;
+    height: 100%;
+    padding-top: 16px;
+}
+
+.list {
+    font-size: 16px;
+    color: #030303;
+    border-top: 1px solid #ccc;
+    view.device {
+        padding: 20rpx 30rpx;
+        border-bottom: 1px solid #ccc;
+        height: 80px;
+        box-sizing: border-box;
+        position: relative;
+        background-color: #fff;
+        view {
+            line-height: 20px;
+            &.userName, &.price, &.expireTime {
+                display: inline-block;
+            }
+            &.price {
+                margin-left: 10rpx;
+                color: #ccc;
+            }
+            &.expireTime {
+                color: #ccc;
+            }
+            &.charge {
+                height: 80px;
+                line-height: 80px;
+                position: absolute;
+                right: 20rpx;
+                top: 0;
+                color: #0097ff;
+            }
+        }
+    }
+    
+    
+}

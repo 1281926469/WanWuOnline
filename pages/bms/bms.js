@@ -74,7 +74,7 @@ Page({
   },
   getBatteryStatus () {
     const that = this;
-    const url = "https://litin.gpsoo.net/1/devices/search"
+    const url = "https://litin.gmiot.net/1/devices/search"
     wx.request({
       url: url,
       data: {

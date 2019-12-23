@@ -1,0 +1,41 @@
+.list {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+}
+.list view.device {
+  padding: 0 15px;
+  height: 60px;
+  border-bottom: 1px solid #ccc;
+}
+.list view.txt {
+  display: inline-block;
+  height: 60px;
+  vertical-align: middle;
+}
+.list .checkbox {
+  line-height: 60px;
+  margin-right: 5px;
+  height: 60px;
+  display: inline-block;
+}
+.list text {
+  font-size: 15px;
+}
+.list text.expireTime {
+  color: #999999;
+}
+.list text.price {
+  color: #999999;
+  margin-left: 5px;
+}
+.list text.charge {
+  float: right;
+  line-height: 60px;
+  color: #0097ff;
+}
+page {
+  background-color: #EFEFEF;
+  height: 100%;
+  padding-top: 15px;
+  box-sizing: border-box;
+}
