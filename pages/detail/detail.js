@@ -204,7 +204,7 @@ Page({
             for (var i = 0; i < list.length; i++) {
               if (list[i].imei == app.globalData.imei) {
                 chargeObj = list[i]
-                break
+                break;
               }
             }
             if (JSON.stringify(chargeObj) == "{}") {
@@ -220,7 +220,7 @@ Page({
             var expire = '';
             var confirmText = '确定';
             if (chargeObj.expire_time == '2100-01-01 00:00:00') {
-              expire = '终生';
+              expire = '终身';
             } else {
               expire = chargeObj.expire_time.split(' ')[0] + '到期    ' + (chargeObj.fee[0].amount / 100) + '元/年';
               confirmText = '续费';

@@ -8,12 +8,14 @@ Page({
     mapHeight: "300px",
     beginTime: '',
     endTime: '',
+    needMoreData: false,
     currentDate: '0000-00-00',
     currentTime: '00:00:00',
     curretSpeed: 0,
     currentLatitude: 0,
     currentLongitude: 0,
     totalDistance: 0,
+    totalDistanceFixed: 0.00,
     sliderValue: 0,
     image: 'pause',
     timer: 0,
@@ -21,14 +23,35 @@ Page({
     totalTime: '',
     playIndex: 0,
     playData: [],
-    markers: [],
+    timer1: '',
+    timer2: '',
+    fragmentArr: [],
+    
+    markers: [{
+      id: 0,
+      latitude: 22.111111,
+      longitude: 113.957654,
+      iconPath: '../images/marker.png',
+      width: 30,
+      height: 30,
+      anchor:{x:.5, y:.5}
+    }],
     polyline: [{
         points: [],
         color: "#22262DFF",
         width: 4,
         dottedLine: false
     }],
-    imei: 0
+    imei: 0,
+    frequency: 500,
+    currentWholeData: [],
+    marker: {
+     
+    },
+    wholeIndex: 0,
+    lastPoint: '',
+    startPoint: '',
+    newStartTime: ''
   },
 
   /**
@@ -42,7 +65,10 @@ Page({
     this.setData({
       beginTime: options.startDate,
       endTime: options.endDate,
-      imei: options.imei
+      imei: options.imei,
+      min: options.startDate,
+      max:options.endDate,
+      totalTime: this.getTotalTime( options.endDate,options.startDate )
     })
   },
 
@@ -50,13 +76,14 @@ Page({
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-    const that = this
+    const that = this;
     wx.getSystemInfo({
       success: function (res) {
         that.setData({
           mapHeight: (res.windowHeight - 100) + "px"
+ 
         })
-        that.sendRequest(that.data.beginTime, that.data.endTime)
+        that.sendRequest1(that.data.beginTime, that.data.endTime)
       }
     })
   },
@@ -79,7 +106,12 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-    clearInterval(this.data.timer)
+    if (this.data.timer1) {
+      clearTimeout(this.data.timer1);
+    }
+    if (this.data.timer2) {
+      clearTimeout(this.data.timer2);
+    }
     wx.redirectTo({
       url: './../monitor/monitor'
     })
@@ -111,58 +143,6 @@ Page({
   },
   slider3change(e) {
     
-  },
-  addPoints(index) {
-    const that = this
-    let i = index;
-    let distance = 0;
-    let data = this.data.playData
-    this.data.timer = setInterval(function () {
-      let locationB = {
-        longitude: data[i].lng,
-        latitude: data[i].lat,
-        gpsTime: data[i].gps_time
-      }
-      if (i > 0) {
-        let locationA = {
-          longitude: data[i - 1].lng,
-          latitude: data[i - 1].lat,
-          gpsTime: data[i-1].gps_time
-        }
-        distance = distance + that.getDistance(locationB, locationA)
-        that.getRunTime(data[0], data[i])
-      }
-      that.data.polyline[0].points.push(locationB)
-      that.setData({
-        polyline: that.data.polyline,
-        currentDate: that.getDate(data[i].gps_time),
-        currentTime: that.getTime(data[i].gps_time),
-        curretSpeed: data[i].speed,
-        totalDistance: (distance / 1000).toFixed(2),
-        sliderValue: i,
-        markers: [{
-          latitude: data[i].lat,
-          longitude: data[i].lng,
-          iconPath: '../images/marker.png',
-          width: 30,
-          height: 30,
-          rotate: data[i].course,
-          anchor:{x:.5, y:.5}
-        }]
-      })
-      that.markerVisible()
-      i++
-      if (i > (that.data.playData.length - 1)) {
-        clearInterval(that.data.timer)
-      }
-      that.setData({
-        playIndex: i
-      })
-
-    }, 500)
-    this.setData({
-      timer: this.data.timer
-    })
   },
   markerVisible () {
     const that = this
@@ -212,10 +192,10 @@ Page({
       runTime: runTime
     })
   },
-  getTotalTime () {
+  getTotalTime (endTime, beginTime) {
     // 1534349247 1534376833
     let totalTime = '';
-    let timeGap = this.data.playData[this.data.playData.length -1].gps_time - this.data.playData[0].gps_time
+    let timeGap = endTime - beginTime
     let hour = parseInt(timeGap / 3600)
     let minute = parseInt((timeGap % 3600) / 60)
     let second = timeGap % 60
@@ -223,10 +203,7 @@ Page({
     minute = minute >= 10 ? minute : '0' + minute
     second = second >= 10 ? second: '0' + second
     totalTime = hour + ':' + minute + ':' + second
-    this.setData({
-      totalTime: totalTime
-    })
-    console.log(totalTime)
+    return totalTime
   },
   getDate (timestamp) {
     let fullTimestamp = timestamp * 1000
@@ -251,15 +228,25 @@ Page({
       this.setData({
         image: 'play'
       })
-      clearInterval(this.data.timer)
+      if (this.data.timer1) {
+        clearTimeout(this.data.timer1);
+      }
+      if (this.data.timer2) {
+        clearTimeout(this.data.timer2);
+      }
     } else {
       this.setData({
         image: 'pause'
       })
-      this.addPoints(this.data.playIndex)
+      if (this.data.timer1) {
+        this.getFragmentData();
+      }
+      if (this.data.timer2) {
+        this.moveMarker(this.data.fragmentArr, this.data.frequency, this.data.playIndex);
+      }
     }
   },
-  sendRequest(beginTime, endTime) {
+  sendRequest1(beginTime, endTime) {
     const that = this
     wx.request({
       url: 'https://litin.gmiot.net/1/devices/history',
@@ -277,75 +264,124 @@ Page({
 
       },
       success: function (res) {
-       if (res.data.errcode ===0) {
-        let data = res.data.data
-        if (data.pos.length >0) {
-          that.data.playData = that.data.playData.concat(data.pos)
-          that.setData({
-            playData: that.data.playData
-          })
-        }
-        if (data.pos.length > 0 && (data.resEndTime - data.pos[data.pos.length - 1].gps_time > 10)) {
-          that.sendRequest(data.resEndTime, endTime)
-        } else {
-          if (that.data.playData.length > 0) {
-            for (let i = 0; i < that.data.playData.length; i++) {
-              if (that.data.playData[0].speed === 0) {
-                that.data.playData.shift()
-              }
-              if (that.data.playData[that.data.playData.length - 1] ===0) {
-                that.data.playData.pop()
-              }
-            }
-            for (let i = 0; i < that.data.length; i++) {
-              if (that.data.playData[i].speed < 0) {
-                that.data.playData.splice(i, 1)
-              }
-            }
+        if (res.data.errcode === 0) {
+          if (res.data.data.pos.length > 0) {
+            let data = res.data.data;
+            let needMoreData = (data.resEndTime - data.pos[data.pos.length - 1].gps_time) > 10
             that.setData({
-              playData: that.data.playData
-            })            
-              that.getTotalTime()
-              that.setData({
-                min: 0,
-                max: that.data.playData.length - 1,
-                currentLongitude: that.data.playData[0].lng,
-                currentLatitude: that.data.playData[0].lat
-              })
-              that.addPoints(0)            
+              currentWholeData: data.pos,
+              needMoreData: needMoreData,
+              newStartTime: data.resEndTime,
+              wholeIndex: 0        
+            });
+            that.getFragmentData();
           } else {
             wx.getLocation({
               type: 'gcj02',
               success: function (res) {
                 that.setData({
                   currentLatitude: res.latitude,
-                  currentLongitude: res.longitude
+                  currentLongitude: res.longitude,
+                  sliderValue: endTime
                 })
                 wx.showToast({
                   title: '没有回放数据',
                   icon: 'none',
                   duration: 2000,
                   success: function (res) {
-                    setTimeout(() => {
-                      
-                    }, 2000);
+                    
                   }
                 })
               }
             })
-            
           }
         }
-       }
-        
-      },
-      fail: function (err) {
-        wx.showToast({
-          title: '获取数据失败',
-          icon: 'none',
-          duration: 2000
-        })
       }
     })
+  },
+  getFragmentData () {
+    let {currentWholeData, wholeIndex,needMoreData } = this.data;
+    let count = this.data.wholeIndex;
+    let arr = [currentWholeData[count]];
+    if ((currentWholeData.length - 1) === wholeIndex) {
+      if (needMoreData) {
+        this.sendRequest1(this.data.newStartTime, this.data.endTime);
+      }
+      return  
+    }
+    for (let i = (count+1); i < currentWholeData.length; i++) {
+        if ((currentWholeData[i].gps_time - arr[0].gps_time) < 10) {
+          arr.push(currentWholeData[i]);
+        } else {
+          this.setData({
+            wholeIndex: i,
+            fragmentArr: arr
+          });
+          break;
+        }
+    }
+    this.moveMarker(arr, this.data.frequency / arr.length, 0);
+  },
+  moveMarker (points, frequency, count) {
+    const that = this;
+    let item = points[count]; 
+    let {totalDistance, polyline} = this.data;
+    let locationB = {
+        longitude: item.lng,
+        latitude: item.lat,
+        gpsTime: item.gps_time
+    }
+    if (!that.data.startPoint) {
+      that.data.startPoint = item;
+    }
+    if (this.data.lastPoint) {
+      let locationA = {
+        longitude: that.data.lastPoint.lng,
+        latitude: that.data.lastPoint.lat,
+        gpsTime: that.data.lastPoint.gps_time
+      }
+      let distance = that.getDistance(locationB, locationA) / 1000;
+      totalDistance = totalDistance + distance;
+      that.getRunTime(that.data.startPoint, item);
+    }
+    polyline[0].points.push(locationB);
+
+    this.setData({
+      totalDistance: totalDistance,
+      totalDistanceFixed: totalDistance.toFixed(2),
+      lastPoint: item,
+      startPoint: that.data.startPoint,
+      polyline: polyline,
+      sliderValue: item.gps_time,
+      currentDate: that.getDate(item.gps_time),
+        currentTime: that.getTime(item.gps_time),
+      "markers[0].latitude": item.lat,
+      "markers[0].longitude": item.lng,
+      "markers[0].rotate": item.course,
+      curretSpeed: item.speed
+
+    })
+
+
+    that.markerVisible();
+    if (count == (points.length -1)) {
+      let timer1 = setTimeout(() => {
+        this.getFragmentData();
+      }, frequency)
+      this.setData({
+        timer1,
+        timer2: ''
+      })
+    } else {
+      let newCount = count + 1
+      let timer2 = setTimeout(() => {
+        this.moveMarker(points, frequency, newCount);
+      }, frequency)
+      this.setData({
+        timer1: '',
+        timer2,
+        playIndex: newCount
+      })
+    }
   }
 })

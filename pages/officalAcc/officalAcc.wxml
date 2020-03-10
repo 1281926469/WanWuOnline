@@ -1,0 +1,12 @@
+<view class="content">
+    <view class="ring">
+        <image src="../images/ring.png"></image>
+    </view>
+    <view class="hint">
+        <text>点击下一步，开启微信报警推送</text>
+    </view>
+    <button bindtap="wxLogin" open-type="contact" send-message-path="/pages/authorize/authorize" send-message-img="../images/startPage.jpg" show-message-card="true" > 
+        <image src="../images/wechat.png"></image>
+        <text>下一步</text>
+    </button>
+</view>

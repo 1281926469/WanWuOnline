@@ -5,7 +5,8 @@ Page({
    * 页面的初始数据
    */
   data: {
-    showDialog: false
+    showDialog: false,
+    canIUse: wx.canIUse('button.open-type.getUserInfo')
   },
 
   /**
@@ -46,10 +47,11 @@ Page({
           },
           success: function (res) {
             if (res.data.errcode === 0) {
-              app.globalData.account = res.data.data.account
-              app.globalData.accessToken = res.data.data.access_token
+              app.globalData.account = res.data.data.account;
+              app.globalData.accessToken = res.data.data.access_token;
               that.getAppTheme();
-              if (res.data.data.name.indexOf('goocar-') > -1) {
+
+              if (res.data.data.name != app.globalData.userInfo.nickName) {
                 that.setData({
                   showDialog: true
                 })
@@ -147,25 +149,23 @@ Page({
     }
   },
   bindGetUserInfo(e) {
-    this.setData({
-      showDialog: false
-    })
-    
     let rawData = JSON.parse(e.detail.rawData)
     let name = rawData.nickName
     const url = "https://litin.gmiot.net/GetDataService"
     let data = {
       method: "modifyEnterprise",
       writes: true,
-      name: name + '(微信)',
+      name: name,
       access_token: app.globalData.accessToken
     }
     wx.request({
       url: url,
       data: data,
-      success: function (res) {
+      success: res => {
         if(res.data.errcode ===0) {
-          
+          this.setData({
+            showDialog: false
+          })
         } else {          
           wx.showToast({
             title: '获取微信昵称失败'

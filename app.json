@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/authorize/authorize",
+    "pages/officalAcc/officalAcc",
     "pages/cmd/cmd",
     "pages/monitor/monitor",
     "pages/deviceList/deviceList",

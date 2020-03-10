@@ -5,7 +5,7 @@
         <text>{{currentDate}}</text>
         <text>{{currentTime}}</text>
         <text>速度:{{curretSpeed}}km/h</text>
-        <text>里程:{{totalDistance}}km</text>
+        <text>里程:{{totalDistanceFixed}}km</text>
     </view>
     <view class="slider">
         <image class="play" src="./../images/{{image}}.png" bindtap="playAndPause"></image>   
